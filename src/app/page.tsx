@@ -14,8 +14,12 @@ export default function Home() {
     setError('');
     try {
       const res = await fetch(`/api/weather?city=${encodeURIComponent(cityName)}`);
-      if (!res.ok) throw new Error('Ville introuvable');
       const result = await res.json();
+
+      if (!res.ok || result.error) {
+        throw new Error(result.error || 'Ville introuvable');
+      }
+
       setData(result);
     } catch (err: any) {
       setError(err.message || 'Erreur lors du chargement');
@@ -63,16 +67,16 @@ export default function Home() {
         {loading && <p className="text-center text-slate-400 py-8">Chargement de la météo...</p>}
         {error && <p className="text-center text-red-400 py-8">{error}</p>}
 
-        {/* Affichage des métriques */}
-        {!loading && !error && data && (
+        {/* Affichage des métriques sécurisé */}
+        {!loading && !error && data?.current && (
           <div className="text-center">
-            <h1 className="text-3xl font-bold">{data.location.name}</h1>
-            <p className="text-slate-400 text-sm">{data.location.country}</p>
+            <h1 className="text-3xl font-bold">{data.location?.name ?? 'Ville inconnue'}</h1>
+            <p className="text-slate-400 text-sm">{data.location?.country ?? ''}</p>
 
             <div className="my-6 flex justify-center items-center gap-4">
               <CloudSun className="w-16 h-16 text-yellow-400" />
               <span className="text-5xl font-extrabold">
-                {Math.round(data.current.temperature_2m)}°C
+                {Math.round(data.current.temperature_2m ?? 0)}°C
               </span>
             </div>
 
@@ -81,14 +85,16 @@ export default function Home() {
                 <Droplets className="text-blue-400 w-6 h-6" />
                 <div className="text-left">
                   <p className="text-xs text-slate-400">Humidité</p>
-                  <p className="font-semibold">{data.current.relative_humidity_2m}%</p>
+                  <p className="font-semibold">{data.current.relative_humidity_2m ?? 0}%</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-slate-700/50 p-3 rounded-xl">
                 <Wind className="text-slate-300 w-6 h-6" />
                 <div className="text-left">
                   <p className="text-xs text-slate-400">Vent</p>
-                  <p className="font-semibold">{Math.round(data.current.wind_speed_10m)} km/h</p>
+                  <p className="font-semibold">
+                    {Math.round(data.current.wind_speed_10m ?? 0)} km/h
+                  </p>
                 </div>
               </div>
             </div>
