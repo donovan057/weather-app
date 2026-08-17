@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     );
     const geoData = await geoRes.json();
 
-    if (!geoData.results?length) {
+    if (!geoData.results?.length) {
         return NextResponse.json({ error: 'Ville introuvable' }, {status: 404});
     }
 
